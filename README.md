@@ -19,6 +19,76 @@ gotasks/
     └── src/api/      # Client fetch + módulo tasks
 ```
 
+## Desenvolvimento com Codespaces / Dev Containers
+
+A configuração em `.devcontainer/` permite abrir o projeto direto no GitHub Codespaces ou no VS Code com a extensão [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers), sem nenhuma instalação manual.
+
+### O que é provisionado automaticamente
+
+| Componente | Versão |
+|---|---|
+| Go | 1.24 |
+| Node.js | 22 |
+| PostgreSQL | 16 |
+| `sqlc` | latest |
+| `migrate` (golang-migrate) | latest |
+
+### Abrindo no GitHub Codespaces
+
+1. Clique em **Code → Codespaces → Create codespace on main** no repositório.
+2. Aguarde o container iniciar (o `postCreateCommand` instala as dependências automaticamente).
+3. O banco de dados Postgres já está disponível em `db:5432` (dentro do container) ou `localhost:5432` (a partir do host).
+
+### Abrindo no VS Code com Dev Containers
+
+1. Instale a extensão [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) e o [Docker](https://docs.docker.com/get-docker/).
+2. Abra o repositório no VS Code e clique em **Reopen in Container** quando solicitado (ou use `Ctrl+Shift+P → Dev Containers: Reopen in Container`).
+
+### Variáveis de ambiente no devcontainer
+
+As variáveis já são definidas via `remoteEnv` no `devcontainer.json` e ficam disponíveis no terminal do container:
+
+| Variável | Valor padrão (devcontainer) |
+|---|---|
+| `DATABASE_URL` | `postgres://postgres:postgres@db:5432/gotasks?sslmode=disable` |
+| `PORT` | `8080` |
+| `CORS_ORIGINS` | `http://localhost:5173` |
+| `VITE_API_URL` | `http://localhost:8080` |
+
+> **Nota:** Fora do devcontainer (host), use `localhost` no lugar de `db` na DATABASE_URL (ex.: `postgres://postgres:postgres@localhost:5432/gotasks?sslmode=disable`).
+
+### Primeiros passos dentro do container
+
+```bash
+# 1. Aplicar migrations
+make migrate-up
+
+# 2. (Opcional) Regenerar código sqlc após alterar queries SQL
+make sqlc-gen
+
+# 3. Rodar o backend (porta 8080)
+make backend
+
+# 4. Em outro terminal, rodar o frontend (porta 5173)
+make frontend
+```
+
+Os comandos `make migrate-up` e `make backend` lêem a variável `DATABASE_URL` já configurada. Para ver todos os alvos disponíveis:
+
+```bash
+make help
+```
+
+### Portas encaminhadas
+
+| Porta | Serviço |
+|---|---|
+| 8080 | Backend API |
+| 5173 | Frontend Vite |
+| 5432 | PostgreSQL |
+
+---
+
 ## Pré-requisitos
 
 - Go 1.24+
