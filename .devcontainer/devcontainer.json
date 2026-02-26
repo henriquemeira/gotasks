@@ -1,0 +1,47 @@
+{
+  "name": "gotasks Dev Container",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/gotasks",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    }
+  },
+
+  "forwardPorts": [8080, 5173, 5432],
+  "portsAttributes": {
+    "8080": {
+      "label": "Backend API",
+      "onAutoForward": "notify"
+    },
+    "5173": {
+      "label": "Frontend (Vite)",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    }
+  },
+
+  "remoteEnv": {
+    "DATABASE_URL": "postgres://postgres:postgres@db:5432/gotasks?sslmode=disable",
+    "PORT": "8080",
+    "CORS_ORIGINS": "http://localhost:5173",
+    "VITE_API_URL": "http://localhost:8080"
+  },
+
+  "postCreateCommand": "go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest && go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest && cd /workspaces/gotasks/backend && go mod download && cd /workspaces/gotasks/frontend && npm install",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
